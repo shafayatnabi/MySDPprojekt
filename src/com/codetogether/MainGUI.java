@@ -273,6 +273,8 @@ public class MainGUI extends JFrame {
                     public void actionPerformed(ActionEvent ae) {
                         String in=chat.getText();
                         client.send("chat"+client.username+" :"+in);
+                        String newmsg=agerchat.getText()+"\n"+client.username+" :"+in;
+                        agerchat.setText(newmsg);
                         chat.setText("");
                     }
                 });
@@ -371,7 +373,8 @@ public class MainGUI extends JFrame {
 		textPane.setText(code);
 	}
         public void setchat(String msg){
-            agerchat.setText(msg);
+            String newmsg=agerchat.getText()+"\n"+msg;
+            agerchat.setText(newmsg);
         }
 
    
