@@ -1,6 +1,7 @@
 package com.codetogether;
 
 import java.awt.BorderLayout;
+import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
@@ -30,6 +31,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JToolBar;
+import javax.swing.ScrollPaneConstants;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 import javax.swing.text.BadLocationException;
@@ -42,6 +44,9 @@ public class MainGUI extends JFrame {
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
 	private JTextField txtAddress;
+        private JTextField chat;
+        private JTextArea agerchat;
+        private JButton send;
 	private JEditorPane textPane;
 	private JMenu mnFile;
 	private JMenu mnEdit;
@@ -249,8 +254,32 @@ public class MainGUI extends JFrame {
 		txtAddress.setColumns(10);
 		
 		textPane.requestFocusInWindow();
-		
-		//CSyntaxKit.initKit();
+		JPanel jp=new JPanel();
+                jp.setLayout(new FlowLayout());
+                agerchat=new JTextArea(15,20);
+                 agerchat.setEditable(false);
+                 JScrollPane chatscrool = new JScrollPane(agerchat);
+                  chatscrool.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+                  chatscrool.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
+                jp.add(chatscrool);
+                chat = new JTextField(20);
+                send=new JButton("Send");
+                jp.add(chat);
+                jp.add(send);
+                contentPane.add(jp,BorderLayout.EAST);
+                send.addActionListener(new ActionListener() {
+
+                    @Override
+                    public void actionPerformed(ActionEvent ae) {
+                        String in=chat.getText();
+                        client.send("chat"+client.username+" :"+in);
+                        chat.setText("");
+                    }
+                });
+               // JPanel jp=new JPanel();
+                
+                //chatpanel.add(jp);
+                //CSyntaxKit.initKit();
 		//textPane.setContentType("text/c");
 	}
 	
@@ -341,5 +370,10 @@ public class MainGUI extends JFrame {
 	public void setSourceCode(String code){
 		textPane.setText(code);
 	}
+        public void setchat(String msg){
+            agerchat.setText(msg);
+        }
+
+   
 
 }

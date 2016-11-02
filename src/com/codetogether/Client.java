@@ -100,6 +100,9 @@ public class Client {
 								JOptionPane.showMessageDialog(null, s.substring(7), "Server", JOptionPane.INFORMATION_MESSAGE);
 							}
 						}else{
+                                                    if(s.startsWith("chat"))
+                                                        gui.setchat(s.substring(4));
+                                                    else
 							gui.setSourceCode(s);
 						}
 						
