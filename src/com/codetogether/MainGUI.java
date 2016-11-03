@@ -3,11 +3,13 @@ package com.codetogether;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.GridLayout;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.FileReader;
@@ -17,7 +19,9 @@ import java.io.IOException;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.ActionMap;
+import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
+import javax.swing.InputMap;
 import javax.swing.JButton;
 import javax.swing.JEditorPane;
 import javax.swing.JFileChooser;
@@ -31,6 +35,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JToolBar;
+import javax.swing.KeyStroke;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
@@ -44,7 +49,7 @@ public class MainGUI extends JFrame {
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
 	private JTextField txtAddress;
-        private JTextField chat;
+        private JTextArea chat;
         private JTextArea agerchat;
         private JButton send;
 	private JEditorPane textPane;
@@ -255,28 +260,62 @@ public class MainGUI extends JFrame {
 		
 		textPane.requestFocusInWindow();
 		JPanel jp=new JPanel();
-                jp.setLayout(new FlowLayout());
-                agerchat=new JTextArea(15,20);
+                jp.setLayout(new BoxLayout(jp, BoxLayout.Y_AXIS));
+                JPanel agerchatp=new JPanel();
+                agerchat=new JTextArea(15,30);
                  agerchat.setEditable(false);
-                 JScrollPane chatscrool = new JScrollPane(agerchat);
-                  chatscrool.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-                  chatscrool.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
-                jp.add(chatscrool);
-                chat = new JTextField(20);
-                send=new JButton("Send");
-                jp.add(chat);
-                jp.add(send);
-                contentPane.add(jp,BorderLayout.EAST);
-                send.addActionListener(new ActionListener() {
+                 agerchat.setLineWrap(true);
+                agerchat.setWrapStyleWord(true);
+                JScrollPane chatscrool = new JScrollPane(agerchat);
+                chatscrool.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+                agerchatp.add(chatscrool);
+                jp.add(agerchatp);
+                JPanel jp2=new JPanel();
+                jp2.setLayout(new FlowLayout());
+                chat = new JTextArea(5,20);
+                chat.setLineWrap(true);
+                chat.setWrapStyleWord(true);
+                JScrollPane areaScrollPane = new JScrollPane(chat);
+                String INSERT_BREAK="NEWLINE";
+                String CHAT_SUBMIT="SUBMIT";
+                InputMap input = chat.getInputMap();
+                KeyStroke enter = KeyStroke.getKeyStroke("ENTER");
+                KeyStroke shiftEnter = KeyStroke.getKeyStroke("shift ENTER");
+                input.put(shiftEnter, INSERT_BREAK);  
+                input.put(enter, CHAT_SUBMIT);
+                ActionMap actions = chat.getActionMap();
+                actions.put(CHAT_SUBMIT, new AbstractAction() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                            String in=chat.getText();
+                            client.send("chat"+client.username+" :"+in);
+                            String newmsg=agerchat.getText()+"\n"+client.username+" :"+in;
+                            agerchat.setText(newmsg);
+                            chat.setText("");
+                    }
+                });
+                actions.put(INSERT_BREAK, new AbstractAction() {
 
                     @Override
                     public void actionPerformed(ActionEvent ae) {
                         String in=chat.getText();
-                        client.send("chat"+client.username+" :"+in);
-                        String newmsg=agerchat.getText()+"\n"+client.username+" :"+in;
-                        agerchat.setText(newmsg);
-                        chat.setText("");
+                        in+='\n';
+                        chat.setText(in);
                     }
+                });
+                
+                areaScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+                send = new JButton("Send");
+                jp2.add(areaScrollPane);
+                jp2.add(send);
+                jp.add(jp2);
+                contentPane.add(jp,BorderLayout.EAST);
+                send.addActionListener((ActionEvent ae) -> {
+                    String in=chat.getText();
+                    client.send("chat"+client.username+": "+in);
+                    String newmsg=agerchat.getText()+"\n"+client.username+": "+in;
+                    agerchat.setText(newmsg);
+                    chat.setText("");
                 });
                // JPanel jp=new JPanel();
                 
@@ -288,6 +327,7 @@ public class MainGUI extends JFrame {
 	Action Open = new AbstractAction("Open", new ImageIcon("open.gif")) {
 		private static final long serialVersionUID = 1L;
 
+                @Override
 		public void actionPerformed(ActionEvent e) {
 			saveOld();
 			if(dialog.showOpenDialog(null)==JFileChooser.APPROVE_OPTION) {
@@ -300,6 +340,7 @@ public class MainGUI extends JFrame {
 	Action Save = new AbstractAction("Save", new ImageIcon("save.gif")) {
 		private static final long serialVersionUID = 1L;
 
+                @Override
 		public void actionPerformed(ActionEvent e) {
 			if(!currentFile.equals("Untitled"))
 				saveFile(currentFile);
@@ -311,6 +352,7 @@ public class MainGUI extends JFrame {
 	Action SaveAs = new AbstractAction("Save as...") {
 		private static final long serialVersionUID = 1L;
 
+                @Override
 		public void actionPerformed(ActionEvent e) {
 			saveFileAs();
 		}
@@ -319,6 +361,7 @@ public class MainGUI extends JFrame {
 	Action Quit = new AbstractAction("Quit") {
 		private static final long serialVersionUID = 1L;
 
+                @Override
 		public void actionPerformed(ActionEvent e) {
 			saveOld();
 			System.exit(0);
